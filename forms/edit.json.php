@@ -39,6 +39,7 @@ try {
     $id = required_param( 'id', PARAM_INT ); // Course id.
     $action = required_param( 'action', PARAM_ALPHANUMEXT );
     $userid = optional_param( 'userid', false, PARAM_INT );
+    $copy = optional_param('privatecopy', false, PARAM_INT);
     $subid = optional_param( 'subid', false, PARAM_INT );
     $vpl = new mod_vpl( $id );
     // TODO use or not sesskey."require_sesskey();".
@@ -63,7 +64,11 @@ try {
         $vpl->require_capability( VPL_SUBMIT_CAPABILITY );
         $vpl->restrictions_check();
     } else { // Make other user submission.
-        $vpl->require_capability( VPL_GRADE_CAPABILITY );
+        if ($copy) {
+            $vpl->require_any_capability( [VPL_GRADE_CAPABILITY, VPL_MANAGE_CAPABILITY] );
+        } else {
+            $vpl->require_capability( VPL_MANAGE_CAPABILITY );
+        }
     }
     $instance = $vpl->get_instance();
     switch ($action) {
